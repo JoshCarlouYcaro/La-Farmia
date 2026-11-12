@@ -66,12 +66,7 @@ const sectionObserver = new IntersectionObserver(entries=>{
 },{rootMargin:"-35% 0px -55% 0px", threshold:0});
 sections.forEach(section=>sectionObserver.observe(section));
 
-document.getElementById("inquiryForm")?.addEventListener("submit", (event) => {
-  event.preventDefault();
-  const status = document.querySelector(".form-status");
-  status.textContent = "Thank you. Your inquiry is ready to be connected to the approved La Farmia email or inquiry system.";
-  event.target.reset();
-});
+
 // I-initialize ang Lenis para sa buttery-smooth wheel effect
 const lenis = new Lenis({
   duration: 1.2,     // Kung gaano katagal ang glide effect (taasan mo kung gusto mo mas "mahangin")
@@ -119,4 +114,89 @@ window.addEventListener('scroll', function() {
       imageBox.classList.remove('absolute-bottom');
     }
   }
+});
+document.addEventListener("DOMContentLoaded", () => {
+    const slides = document.querySelectorAll(".slideshow-container .slide-img");
+    let currentSlide = 0;
+
+    if (slides.length > 1) {
+      setInterval(() => {
+        // Alisin ang active class sa kasalukuyang image
+        slides[currentSlide].classList.remove("active");
+        
+        // Lumipat sa susunod na image (babalik sa 0 kapag nakarating sa dulo)
+        currentSlide = (currentSlide + 1) % slides.length;
+        
+        // Idagdag ang active class sa bagong image
+        slides[currentSlide].classList.add("active");
+      }, 3000); // 3000ms = 3 seconds
+    }
+  });
+document.addEventListener('DOMContentLoaded', () => {
+  const carousels = document.querySelectorAll('.carousel-container');
+
+  carousels.forEach((carousel) => {
+    const track = carousel.querySelector('.carousel-track');
+    const dots = carousel.querySelectorAll('.dot');
+    const totalSlides = dots.length;
+    let currentIndex = 0;
+
+    // Variables para sa touch swipe at mouse drag
+    let startX = 0;
+    let currentX = 0;
+    let isDragging = false;
+
+    function goToSlide(index) {
+      if (index < 0) index = 0;
+      if (index >= totalSlides) index = totalSlides - 1;
+      
+      currentIndex = index;
+      track.style.transition = 'transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1)';
+      track.style.transform = `translateX(-${currentIndex * 100}%)`;
+
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === currentIndex);
+      });
+    }
+
+    // Click sa mga bilog (dots)
+    dots.forEach((dot, index) => {
+      dot.addEventListener('click', (e) => {
+        e.stopPropagation();
+        goToSlide(index);
+      });
+    });
+
+    // Touch Events (Mobile & Tablet Swipe)
+    carousel.addEventListener('touchstart', (e) => {
+      startX = e.touches[0].clientX;
+      currentX = startX;
+      isDragging = true;
+      track.style.transition = 'none';
+    }, { passive: true });
+
+    carousel.addEventListener('touchmove', (e) => {
+      if (!isDragging) return;
+      currentX = e.touches[0].clientX;
+      const diff = currentX - startX;
+      const containerWidth = carousel.offsetWidth;
+      const movePercent = (diff / containerWidth) * 100;
+      track.style.transform = `translateX(calc(-${currentIndex * 100}% + ${movePercent}%))`;
+    }, { passive: true });
+
+    carousel.addEventListener('touchend', () => {
+      if (!isDragging) return;
+      isDragging = false;
+      const diff = currentX - startX;
+      const threshold = 40; // Minimum swipe distance (px)
+
+      if (diff < -threshold && currentIndex < totalSlides - 1) {
+        goToSlide(currentIndex + 1); // Swipe left -> Next
+      } else if (diff > threshold && currentIndex > 0) {
+        goToSlide(currentIndex - 1); // Swipe right -> Previous
+      } else {
+        goToSlide(currentIndex); // Balik sa current slide pag bitin ang swipe
+      }
+    });
+  });
 });
